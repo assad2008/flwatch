@@ -1,0 +1,228 @@
+#!/bin/bash
+# encoding=utf-8
+
+if [ $# -lt 1 ]
+then
+  echo "USAGE: $0 start|stop|restart [watching]"
+	exit 1
+fi
+
+SHELL_DIR=$(dirname $(readlink /proc/$$/fd/255))
+BASEDIR=$(dirname $(dirname $(readlink /proc/$$/fd/255)))
+
+CTRLPY_DIR=$BASEDIR"/watching"
+UNCTRLPY_DIR=$BASEDIR"/unwatching"
+PYTHON=$BASEDIR"/python/bin/python"
+
+if [ ! -f $PYTHON ]
+then
+	PYTHON='/usr/bin/python'
+	PYTHONVERSION=`$PYTHON -V 2>&1 | awk '{print $2}'`
+	
+	if [ "${PYTHONVERSION}" != "2.7.5" ]
+	then
+		echo "请安装指定版�?2.7.5 的PYTHON再执行此程序"
+		exit 1	
+	fi
+fi
+
+sevlist='
+         watching|Flwmonitor.py
+		  watching|FlwlNotice.py
+	'
+
+service_start(){
+
+	export PYTHONPATH=$BASEDIR
+	if [ ! -z $1 ]
+	then
+		for i in $sevlist
+		do
+			j=`echo $i|awk -F'|' '{print $1}'`
+			k=`echo $i|awk -F'|' '{print $2}'`
+			if [[ "$1" == "$j" ]]
+			then
+				if [ -f $CTRLPY_DIR"/"$k ]
+				then
+					cd $CTRLPY_DIR
+				else
+					cd $UNCTRLPY_DIR
+					
+				fi
+				$PYTHON $k "start" >/dev/null & 
+				if [ $? == 0 ]
+				then
+					echo "$k start successfully!"
+				else
+					echo "$k start error!"			
+				fi
+				
+			    exit
+			
+			fi
+		
+		done	
+	else	
+		
+		for f in $sevlist
+		do
+	                k=`echo $f|awk -F'|' '{print $2}'`
+			if [ -f $CTRLPY_DIR"/"$k ]
+	                then
+        	                cd $CTRLPY_DIR
+                	else
+                        	cd $UNCTRLPY_DIR
+			fi
+			if [ -f $k ]
+			then
+				$PYTHON $k "start" >/dev/null & 
+				if [ $? == 0 ]
+				then
+					echo "$k start successfully!"
+				else
+					echo "$k start error!"			
+				fi
+			fi
+			
+		done
+		
+	
+	fi
+
+}
+
+service_stop(){
+
+	export PYTHONPATH=$BASEDIR
+	if [ ! -z $1 ]
+	then
+		for i in $sevlist
+		do
+			j=`echo $i|awk -F'|' '{print $1}'`
+			k=`echo $i|awk -F'|' '{print $2}'`
+			if [[ "$1" == "$j" ]]
+			then
+				if [ -f $CTRLPY_DIR"/"$k ]
+				then
+					cd $CTRLPY_DIR
+				else
+					cd $UNCTRLPY_DIR
+					
+				fi
+				$PYTHON $k "stop" >/dev/null & 
+				if [ $? == 0 ]
+				then
+					echo "$k stop successfully!"
+				else
+					echo "$k stop error!"			
+				fi
+				
+			    exit
+			
+			fi
+		
+		done	
+	else	
+		
+		for f in $sevlist
+		do
+	        k=`echo $f|awk -F'|' '{print $2}'`
+			if [ -f $CTRLPY_DIR"/"$k ]
+	                then
+        	                cd $CTRLPY_DIR
+                	else
+                        	cd $UNCTRLPY_DIR
+			fi
+			if [ -f $k ]
+			then
+				$PYTHON $k "stop" >/dev/null & 
+				if [ $? == 0 ]
+				then
+					echo "$k stop successfully!"
+				else
+					echo "$k stop error!"			
+				fi
+			fi
+			
+		done
+		
+	
+	fi
+
+}
+
+service_restart(){
+
+	export PYTHONPATH=$BASEDIR
+	if [ ! -z $1 ]
+	then
+		for i in $sevlist
+		do
+			j=`echo $i|awk -F'|' '{print $1}'`
+			k=`echo $i|awk -F'|' '{print $2}'`
+			if [[ "$1" == "$j" ]]
+			then
+				if [ -f $CTRLPY_DIR"/"$k ]
+				then
+					cd $CTRLPY_DIR
+				else
+					cd $UNCTRLPY_DIR
+					
+				fi
+				$PYTHON $k "restart" >/dev/null & 
+				if [ $? == 0 ]
+				then
+					echo "$k restart successfully!"
+				else
+					echo "$k restart error!"			
+				fi
+				
+			    exit
+			
+			fi
+		
+		done	
+	else	
+		
+		for f in $sevlist
+		do
+	        k=`echo $f|awk -F'|' '{print $2}'`
+			if [ -f $CTRLPY_DIR"/"$k ]
+	                then
+        	                cd $CTRLPY_DIR
+                	else
+                        	cd $UNCTRLPY_DIR
+			fi
+			if [ -f $k ]
+			then
+				$PYTHON $k "restart" >/dev/null & 
+				if [ $? == 0 ]
+				then
+					echo "$k restart successfully!"
+				else
+					echo "$k restart error!"			
+				fi
+			fi
+			
+		done
+		
+	
+	fi
+
+}
+
+case $1 in
+	start|START)
+	service_start $2
+	;;
+	stop|STOP)
+	service_stop $2
+	;;
+	restart|RESTART)
+	service_restart $2	
+	;;
+	*)
+	echo "USAGE: $0 start|stop|restart [watching]"
+	exit 1
+	;;
+esac
